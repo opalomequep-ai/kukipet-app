@@ -1,74 +1,80 @@
-import { Suspense } from "react"
+// app/page.tsx (o pages/index.tsx)
+import { createClient } from '@/utils/supabase/server'
+import Link from 'next/link'
 
-import { Separator } from "@/components/ui/separator"
-import { FadeIn } from "@/components/cult/fade-in"
-import { DirectorySearch } from "@/components/directory-search"
-import { Hero } from "@/components/hero"
+export default async function Home() {
+  const supabase = createClient()
+  
+  // Obtener listados publicados
+  const { data: listings, error } = await supabase
+    .from('listings')
+    .select('*')
+    .eq('published', true)
+    .order('created_at', { ascending: false })
 
-import {
-  EmptyFeaturedGrid,
-  FeaturedGrid,
-  ResourceCardGrid,
-} from "../components/directory-card-grid"
-import { NavSidebar } from "../components/nav"
-import { getCachedFilters } from "./actions/cached_actions"
-import { getProducts } from "./actions/product"
-
-// Select the resources you want to feature.. AD SPACE?
-const FEATURED_IDS = [
-  // "3b741434-1bdb-4903-91e9-a7fa154a8fdf",
-  // "f8a5db00-c80e-4fe4-80a7-af9d79a03690",
-  // "ad4b9d2e-6461-4eed-afbf-86aa284000cc",
-  "",
-] // Replace 'id1', 'id2', 'id3' with actual IDs you want to feature
-
-async function Page({ searchParams }: { searchParams: { search?: string } }) {
-  let data = await getProducts(searchParams.search)
-  let filters = await getCachedFilters()
-  const filteredFeaturedData = data.filter((d: any) =>
-    FEATURED_IDS.includes(d.id)
-  )
+  if (error) {
+    console.error('Error cargando listados:', error)
+  }
 
   return (
-    <>
-      <NavSidebar
-        categories={filters.categories}
-        labels={filters.labels}
-        tags={filters.tags}
-      />
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-orange-600">🐾 Kukipet</h1>
+          <span className="text-sm text-gray-500">Cuenca - Ecuador</span>
+        </div>
+      </header>
 
-      <div className="max-w-full px-2 md:pl-4 md:pr-0 pt-2">
-        <FadeIn>
-          <ResourceCardGrid
-            sortedData={data}
-            filteredFeaturedData={filteredFeaturedData}
-          >
-            <div className="grid grid-cols-1  xl:grid-cols-6 lg:gap-16 pb-8 pt-8 relative">
-              <div className="col-span-1 md:col-span-2 z-10">
-                <Hero>
-                  <DirectorySearch />
-                </Hero>
-              </div>
+      {/* Hero */}
+      <section className="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-2">Todo para tu mascota en un solo lugar</h2>
+          <p className="text-lg opacity-90">Veterinarias • Pet shops • Grooming • Snacks Kukipet</p>
+        </div>
+      </section>
 
-              <div className="col-span-1 md:col-span-4 mt-6 md:mt-0">
-                {filteredFeaturedData.length >= 1 ? (
-                  <Suspense fallback={<div>Loading...</div>}>
-                    <div className=" relative">
-                      <FeaturedGrid featuredData={filteredFeaturedData} />
-                    </div>
-                  </Suspense>
-                ) : (
-                  <div className="relative">
-                    <EmptyFeaturedGrid />
-                  </div>
+      {/* Listados */}
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {listings && listings.length > 0 ? (
+            listings.map((item) => (
+              <div key={item.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition">
+                {item.image_url && (
+                  <img src={item.image_url} alt={item.title} className="w-full h-48 object-cover" />
                 )}
+                <div className="p-4">
+                  <span className="inline-block px-2 py-1 text-xs font-semibold text-orange-600 bg-orange-50 rounded-full mb-2">
+                    {item.category}
+                  </span>
+                  <h3 className="text-xl font-bold mb-1">{item.title}</h3>
+                  <p className="text-gray-600 text-sm mb-2">{item.description}</p>
+                  <p className="text-gray-500 text-xs mb-3">{item.location || item.address}</p>
+                  <a
+                    href={`https://wa.me/${item.phone?.replace(/\D/g, '') || '593999999999'}?text=Hola%2C%20vi%20tu%20servicio%20en%20Kukipet%20y%20me%20interesa`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full text-sm hover:bg-green-600 transition"
+                  >
+                    <span>📱</span> Contactar por WhatsApp
+                  </a>
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="col-span-full text-center py-12 text-gray-500">
+              <p>No hay servicios disponibles aún.</p>
+              <p className="text-sm mt-2">Agrega listados desde Supabase en la tabla `listings`.</p>
             </div>
-          </ResourceCardGrid>
-        </FadeIn>
-      </div>
-    </>
+          )}
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-white border-t mt-12 py-6 text-center text-gray-500 text-sm">
+        <p>Kukipet - Directorio de servicios para mascotas</p>
+        <p className="mt-1">¿Eres veterinaria o pet shop? <a href="#" className="text-orange-500">Contáctanos</a></p>
+      </footer>
+    </div>
   )
 }
-
-export default Page
