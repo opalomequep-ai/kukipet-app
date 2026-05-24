@@ -1,3 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kukipet - Directorio de servicios para mascotas</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: system-ui, 'Segoe UI', Roboto, sans-serif; background:#f5f7fb; color:#1e293b; }
+        .header { background: white; padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .logo h1 { font-size: 1.6rem; color: #e67e22; }
+        .tagline { background:#fef3c7; padding:6px 12px; border-radius:40px; font-size:0.85rem; }
+        .search-section { background:white; padding:20px; margin:16px; border-radius:24px; }
+        .search-box input { width:100%; padding:14px; border:1px solid #e2e8f0; border-radius:60px; font-size:1rem; }
+        .filters { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+        .filter-btn { background:#f1f5f9; border:none; padding:8px 18px; border-radius:40px; cursor:pointer; }
+        .filter-btn.active { background:#e67e22; color:white; }
+        .listings-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:20px; padding:0 16px; margin-top:8px; }
+        .card { background:white; border-radius:24px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
+        .card-img { width:100%; height:160px; object-fit:cover; background:#d9e2ef; display:flex; align-items:center; justify-content:center; font-size:2rem; }
+        .card-content { padding:18px; }
+        .card-category { font-size:0.7rem; text-transform:uppercase; color:#e67e22; font-weight:600; }
+        .card-title { font-size:1.25rem; font-weight:700; margin:6px 0; }
+        .card-desc { font-size:0.85rem; color:#475569; margin-bottom:12px; }
+        .whatsapp-btn { display:inline-flex; align-items:center; gap:8px; background:#25D366; color:white; padding:8px 16px; border-radius:40px; text-decoration:none; font-size:0.85rem; }
+        .footer { text-align:center; padding:24px; font-size:0.75rem; color:#94a3b8; }
+        @media (max-width:640px){ .listings-grid { grid-template-columns:1fr; } .header { flex-direction:column; text-align:center; } }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="logo"><h1>🐾 Kukipet</h1><span>Directorio de servicios para mascotas</span></div>
+    <div class="tagline">✨ Encuentra todo para tu mascota en un solo lugar ✨</div>
+</div>
+<div class="search-section">
+    <div class="search-box"><input type="text" id="searchInput" placeholder="Buscar veterinaria, pet shop, snacks..."></div>
+    <div class="filters" id="filtersContainer">
+        <button class="filter-btn active" data-category="all">Todos</button>
+        <button class="filter-btn" data-category="veterinaria">🐕 Veterinarias</button>
+        <button class="filter-btn" data-category="pet shop">🛒 Pet Shops</button>
+        <button class="filter-btn" data-category="grooming">✂️ Grooming</button>
+        <button class="filter-btn" data-category="snacks">🍪 Snacks Kukipet</button>
+    </div>
+</div>
+<div id="listingsGrid" class="listings-grid">Cargando servicios...</div>
+<div class="footer"><p>Kukipet - Directorio de servicios para mascotas en Cuenca, Ecuador</p></div>
+
 <script>
     // === CONFIGURACIÓN DE SUPABASE ===
     const SUPABASE_URL = 'https://iiesuerlrtutlldnbjxe.supabase.co';
@@ -26,6 +74,7 @@
             
             if (data && data.length > 0) {
                 allListings = data;
+                console.log('Datos cargados desde Supabase:', allListings.length);
             } else {
                 // Si no hay datos en Supabase, usar demostración
                 allListings = DEMO_DATA.map(item => ({ ...item, id: Math.random() }));
@@ -95,3 +144,5 @@
     // Iniciar
     loadListings();
 </script>
+</body>
+</html>
